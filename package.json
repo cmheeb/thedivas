@@ -1,0 +1,13 @@
+{
+    "name": "divas_web_app",
+    "version": "1.0.0",
+    "description": "312 Group Project",
+    "authour": "The <div>as",
+    "main": "server.js",
+    "scrits": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "express": "^4.18.3"
+    }
+}
