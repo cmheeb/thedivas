@@ -1,4 +1,4 @@
-FROM node:8
+FROM node:20.11.1
 
 WORKDIR /root
 
