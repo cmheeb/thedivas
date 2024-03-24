@@ -5,7 +5,7 @@ async function regUser(event) {
     event.preventDefault();
     const username = document.getElementById('reg-username').value;
     const password = document.getElementById('reg-password').value;
-    // const confirmPassword = document.getElementById('reg-confirm-password').value;
+    const confirmPassword = document.getElementById('reg-confirm-password').value;
 
     const result = await fetch('/register', {
         method: 'POST',
@@ -14,7 +14,14 @@ async function regUser(event) {
         },
         body: JSON.stringify({
             username,
-            password
+            password,
+            confirmPassword
         })
     }).then((res) => res.json());
+
+    if(result.status == 'ok') {
+
+    } else {
+        alert(result.error);
+    }
 };

@@ -27,15 +27,19 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.post("/register", async (req, res) => {     // user registration
 
-        const { username, password: plainTextPassword} = req.body;
+        const { username, password: plainTextPassword, confirmPassword: plaintTextConfirm} = req.body;
 
         if(!username) {
-            return res.json({ status: 'error', error: 'Name in use.'});
+            return res.json({ status: 'error', error: 'Please enter a name.'});
         }
 
-        // if(!validate_password(plainTextPassword)) {
-        //     return res.json({ status: 'error', error: 'Password does not meet criteria. Length > 8, at least 1 of; Uppercase, Lowercase, Number and special chatacter(!@#$%^&*?)'})
-        // }
+        if(plainTextPassword != plaintTextConfirm) {
+            return res.json({ status: 'error', error: 'Passwords do not match!'})
+        }
+
+        if(!validate_password(plainTextPassword)) {
+            return res.json({ status: 'error', error: 'Password does not meet criteria. Length > 8, at least 1 of: Uppercase, Lowercase, Number and special chatacter(!@#$%^&*?)'})
+        }
 
         const password = await bcrypt.hash(plainTextPassword, 10);
 
@@ -61,7 +65,7 @@ app.use((req, res) => {     // 404 error code
 app.listen(PORT, HOST);
 console.log(`istening on port ${PORT}`);
 
-// function validate_password(password){
-//     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*?]).{8,}$/;
-//     return regex.test(password)
-// };
+function validate_password(password){
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*?]).{8,}$/;
+    return regex.test(password)
+};
