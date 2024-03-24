@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');  // npm install body-parser
 const mongoose = require('mongoose');       // npm install mongoose
 const User = require('./model/user.js');
 const bcrypt = require('bcryptjs');         // npm install bcryptjs
+const jwt = require('jsonwebtoken');        // npm install jsonwebtoken
 
 const PORT = 8080;
 const HOST = '0.0.0.0';
@@ -24,6 +25,22 @@ app.use(bodyParser.json())  // decode json body
 
 app.use('/', express.static(path.join(__dirname, 'public')))    // display elements
 app.use('/public', express.static(path.join(__dirname, 'public')));
+
+app.post("/login", async (req, res) => {
+
+    const { username, password} = req.body;
+    const user = await User.findOne({ username });
+    if(!user) {
+        return res.json({ status: 'error', error: 'User doesn\'t exist'})
+    }
+    // add login token using JWT
+    if(await bcrypt.compare(password, user.password)) {
+        return res.json({ status: 'ok' });
+    }
+
+    console.log(req.body);
+    res.json({ status: 'ok'});
+});
 
 app.post("/register", async (req, res) => {     // user registration
 
