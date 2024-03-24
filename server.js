@@ -7,9 +7,12 @@ const mongoose = require('mongoose');       // npm install mongoose
 const User = require('./model/user.js');
 const bcrypt = require('bcryptjs');         // npm install bcryptjs
 const jwt = require('jsonwebtoken');        // npm install jsonwebtoken
+const dotenv = require('dotenv');           // npm install dotenv
+dotenv.config();
 
 const PORT = 8080;
 const HOST = '0.0.0.0';
+const secretKey = process.env.SECRET_KEY;
 
 const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/user-creds';   // connects to db
 mongoose.connect(mongoURI);
