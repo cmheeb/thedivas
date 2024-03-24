@@ -46,9 +46,9 @@ async function login(event) {
     }).then((res) => res.json());
 
     if(result.status == 'ok') {
-
+        document.getElementById("user-credentials").innerHTML = `Hello, ${username}!`;
     } else {
         alert(result.error);
     }
-    
+
 };
