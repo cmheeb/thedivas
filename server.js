@@ -1,16 +1,16 @@
-const express = require('express');
+const express = require('express');     // npm install express
 const app = express();
 const path = require('path');
-const favicon = require('serve-favicon');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
+const favicon = require('serve-favicon');   // npm install serve-favicon
+const bodyParser = require('body-parser');  // npm install body-parser
+const mongoose = require('mongoose');       // npm install mongoose
 const User = require('./model/user.js');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs');         // npm install bcryptjs
 
 const PORT = 8080;
 const HOST = '0.0.0.0';
 
-const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/user-creds';
+const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/user-creds';   // connects to db
 mongoose.connect(mongoURI);
 
 app.use(favicon(path.join(__dirname, 'public/images', 'favicon.ico'))); // favicon
@@ -44,17 +44,20 @@ app.post("/register", async (req, res) => {     // user registration
         const password = await bcrypt.hash(plainTextPassword, 10);
 
         try {
-            const response = await User.create({
+            const response = await User.create({    // creates object in db
                 username,
                 password
             });
-            console.log('Successfully created ', response);
+            console.log('Successfully created ', response); // can remove
         } catch (error) {
             console.log(error);
             return res.json({status: error});
         }
 
         res.json({status: 'ok'});
+
+        // add execption if error code == 11000 (duplicate name)
+
 });
 
 app.use((req, res) => {     // 404 error code
