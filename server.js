@@ -7,17 +7,22 @@ const mongoose = require('mongoose');       // npm install mongoose
 const User = require('./model/user.js');
 const bcrypt = require('bcryptjs');         // npm install bcryptjs
 const jwt = require('jsonwebtoken');        // npm install jsonwebtoken
+const cookieParser = require('cookie-parser');  // npm install 
 const dotenv = require('dotenv');           // npm install dotenv
 dotenv.config();
 
 const PORT = 8080;
 const HOST = '0.0.0.0';
+
 const secretKey = process.env.SECRET_KEY;
 
 const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/user-creds';   // connects to db
 mongoose.connect(mongoURI);
 
+app.disable("x-powered-by");
+
 app.use(favicon(path.join(__dirname, 'public/images', 'favicon.ico'))); // favicon
+app.use(cookieParser());
 
 app.use((req, res, next) => {   // nosniff header
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -27,22 +32,56 @@ app.use((req, res, next) => {   // nosniff header
 app.use(bodyParser.json())  // decode json body
 
 app.use('/', express.static(path.join(__dirname, 'public')))    // display elements
-app.use('/public', express.static(path.join(__dirname, 'public')));
+//app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.post("/login", async (req, res) => {
 
-    const { username, password} = req.body;
+    const { username, password } = req.body;
     const user = await User.findOne({ username });
     if(!user) {
         return res.json({ status: 'error', error: 'User doesn\'t exist'})
     }
     // add login token using JWT
     if(await bcrypt.compare(password, user.password)) {
-        return res.json({ status: 'ok' });
+
+        const auth_token = jwt.sign({ id: user._id, username: user.username}, secretKey);
+
+        const hashedAuth = await bcrypt.hash(auth_token, 10);
+
+        await User.updateOne({ username: user.username }, { auth_token: hashedAuth });
+
+        return res.cookie("auth_token", auth_token, {httpOnly: true, maxAge: 3600000}).json({ status: 'ok' });
     }
 
-    console.log(req.body);
-    res.json({ status: 'ok'});
+    res.json({ status: 'error', error: 'Invalid'});
+
+});
+
+app.get("/auth", async (req, res) =>{
+    const token = req.cookies['auth_token'];
+    console.log('Cookie token', token);
+
+    if(!token) {
+        console.log('false');
+        return res.json({ status: 'error', error: 'No auth token!'})
+    }
+
+    const user = await User.findOne({ auth_token: token });
+    console.log('Name', user.username);
+
+    if(!user) {
+        return res.json({ status: 'error', error: 'invalid token'});
+
+    }
+
+    if(await bcrypt.compare(token, user.auth_token)) {
+        const decoded = jwt.verify(token, secretKey);
+        return res.json({ status: 'ok', username: decoded.username});
+    } else { 
+        return res.json({ status: 'error', error: 'invalid token'});
+    
+    }
+
 });
 
 app.post("/register", async (req, res) => {     // user registration

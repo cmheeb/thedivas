@@ -44,6 +44,7 @@ async function login(event) {
             password
         })
     }).then((res) => res.json());
+    console.log('LOGIN', result);
 
     if(result.status == 'ok') {
         document.getElementById("user-credentials").innerHTML = `Hello, ${username}!`;
@@ -52,3 +53,17 @@ async function login(event) {
     }
 
 };
+
+async function checkAuth() {
+    const result = await fetch('/auth').then((res) => res.json());
+    console.log('AUTH', result)
+
+    if(result.status == 'ok') {
+        document.getElementById("user-credentials").innerHTML = `Hello, ${result.username}!`;
+    } else {
+        
+    }
+
+}
+
+window.onload = checkAuth;
