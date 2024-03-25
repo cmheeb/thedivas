@@ -1,6 +1,7 @@
 const express = require('express');     // npm install express
 const app = express();
 const path = require('path');
+const sha256 = require('js-sha256');
 const favicon = require('serve-favicon');   // npm install serve-favicon
 const bodyParser = require('body-parser');  // npm install body-parser
 const mongoose = require('mongoose');       // npm install mongoose
@@ -46,7 +47,7 @@ app.post("/login", async (req, res) => {
 
         const auth_token = jwt.sign({ id: user._id, username: user.username}, secretKey);
 
-        const hashedAuth = await bcrypt.hash(auth_token, 10);
+        const hashedAuth = await sha256(auth_token);
 
         await User.updateOne({ username: user.username }, { auth_token: hashedAuth });
 
@@ -66,7 +67,10 @@ app.get("/auth", async (req, res) =>{
         return res.json({ status: 'error', error: 'No auth token!'})
     }
 
-    const user = await User.findOne({ auth_token: token });
+	const hashedToken = await sha256(token);
+    const user = await User.findOne({ auth_token: hashedToken });
+	console.log("TOKEN: ", hashedToken);
+	
     console.log('Name', user.username);
 
     if(!user) {
@@ -74,7 +78,7 @@ app.get("/auth", async (req, res) =>{
 
     }
 
-    if(await bcrypt.compare(token, user.auth_token)) {
+    if(hashedToken == user.auth_token) {
         const decoded = jwt.verify(token, secretKey);
         return res.json({ status: 'ok', username: decoded.username});
     } else { 
@@ -125,7 +129,7 @@ app.use((req, res) => {     // 404 error code
 });
 
 app.listen(PORT, HOST);
-console.log(`istening on port ${PORT}`);
+console.log(`listening on port ${PORT}`);
 
 function validate_password(password){
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*?]).{8,}$/;
