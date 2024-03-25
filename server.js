@@ -51,7 +51,7 @@ app.post("/login", async (req, res) => {
 
         await User.updateOne({ username: user.username }, { auth_token: hashedAuth });
 
-        return res.cookie("auth_token", auth_token, {httpOnly: true, maxAge: 3600000}).json({ status: 'ok' });
+        return res.cookie("auth_token", auth_token, {httpOnly: true, maxAge: 3600000}).json({ status: 'ok', username: user.username });
     }
 
     res.json({ status: 'error', error: 'Invalid'});
@@ -70,8 +70,6 @@ app.get("/auth", async (req, res) =>{
 	const hashedToken = await sha256(token);
     const user = await User.findOne({ auth_token: hashedToken });
 	console.log("TOKEN: ", hashedToken);
-	
-    console.log('Name', user.username);
 
     if(!user) {
         return res.json({ status: 'error', error: 'invalid token'});
@@ -93,14 +91,17 @@ app.post("/register", async (req, res) => {     // user registration
         const { username, password: plainTextPassword, confirmPassword: plaintTextConfirm} = req.body;
 
         if(!username) {
+            console.log('No username');
             return res.json({ status: 'error', error: 'Please enter a name.'});
         }
 
         if(plainTextPassword != plaintTextConfirm) {
+            console.log('passwords don\'t match');
             return res.json({ status: 'error', error: 'Passwords do not match!'})
         }
 
         if(!validate_password(plainTextPassword)) {
+            console.log('weak password');
             return res.json({ status: 'error', error: 'Password does not meet criteria. Length > 8, at least 1 of: Uppercase, Lowercase, Number and special chatacter(!@#$%^&*?)'})
         }
 
@@ -121,6 +122,21 @@ app.post("/register", async (req, res) => {     // user registration
 
         // add execption if error code == 11000 (duplicate name)
 
+});
+
+app.get('/logout', async (req, res) => {
+    const token = req.cookies['auth_token'];
+    console.log(token);
+
+    res.clearCookie("auth_token");
+
+    const hashedToken = await sha256(token);
+    const user = await User.findOne({ auth_token: hashedToken });
+    console.log('logout user', user.username)
+
+    await User.updateOne({username: user.username}, {$unset: {auth_token: ""}});
+
+    return res.json({ status: 'ok'});
 });
 
 app.use((req, res) => {     // 404 error code
