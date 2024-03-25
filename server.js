@@ -139,6 +139,10 @@ app.get('/logout', async (req, res) => {
     return res.json({ status: 'ok'});
 });
 
+// app.post('/chat-message', async (req, res) => {
+//     res.json({status: 'ok'});
+// });
+
 app.use((req, res) => {     // 404 error code
     res.status(404);
     res.send('<h1>Error 404: Not Found</h1>');

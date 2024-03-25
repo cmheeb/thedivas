@@ -69,7 +69,8 @@ async function checkAuth() {
     }
 
     const result = await fetch('/auth').then((res) => res.json());
-    console.log('AUTH', result)
+    console.log('AUTH', result.auth_token);
+    localStorage.setItem('auth_token', result);
 
     if(result.status == 'ok') {
         document.getElementById("user-credentials").innerHTML = `<div id="logout">Hello, ${result.username}! <form><input type="submit" value="Logout"></form></div>`;
@@ -90,5 +91,31 @@ async function logout() {
     }
 
 }
+
+// const chatForm = document.getElementById('chat-form');
+// chatForm.addEventListener('submit', chatSend);
+
+// async function chatSend(event) {
+//     event.preventDefault;
+
+//     const message = document.getElementById('post-message').value;
+
+//     const result = await fetch('/chat-message', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify({
+//             username: '',
+//             message
+//         })
+//     }).then((res) => res.json());
+
+//     if(result.status == 'ok') {
+//         document.getElementById('post-message').innerHTML = '';
+//     } else {
+//         alert(result.error);
+//     }
+// };
 
 window.onload = checkAuth;

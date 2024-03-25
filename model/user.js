@@ -8,13 +8,14 @@ const userSchema = new mongoose.Schema({
     { collection: 'users'}
 );
 
-const postSchema = new mongoose.Schema({
-    username: { type: String, required: true}, 
-    post: { type: String, required: true},
-    },
-    { collection: 'chat'}
-);
+// const postSchema = new mongoose.Schema({
+//     username: { type: String, required: true}, 
+//     post: { type: String, required: true},
+//     },
+//     { collection: 'chat'}
+// );
 
 const User = mongoose.model('userSchema', userSchema);
-const Post = mongoose.model('postSchema', postSchema);
-module.exports = {User, Post};
+// const Post = mongoose.model('postSchema', postSchema);
+module.exports = User;
+// module.exports = Post;
