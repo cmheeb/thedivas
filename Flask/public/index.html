@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{url_for('static', filename='styles.css')}}" rel="stylesheet">
+    <title>Team &lt;div&gt;as</title>
+  </head>
+  <body class="roboto-regular"">
+
+    <h1>The &lt;div&gt;as Landing Page</h1>
+
+    <img id="logo" src="{{url_for('static', filename='images/ublogo.jpg')}}" alt="UB Logo">
+    <br>
+
+    <div id="user-credentials">
+
+      <form id="reg-form">
+        <input id="reg-username" type="text" placeholder="Username">
+        <br>
+        <input id="reg-password" type="password" placeholder="Password">
+        <br>
+        <input id="reg-confirm-password" type="password" placeholder="Confirm Password">
+        <br>
+        <input type="submit" value="Register">
+      </form>
+      <br>
+      <br>
+      <form id="login-form">
+        <input id="login-username" type="text" placeholder="Username">
+        <br>
+        <input id="login-password" type="password" placeholder="Password">
+        <br>
+        <input type="submit" value="Login">
+      </form>
+
+    </div>
+
+    <br>
+    <br>
+
+    <div id="chat-box">
+
+      <form id="chat-form">
+        <label for="msg">Message:</label>
+          <textarea id="post-message" placeholder="Type message.." required></textarea>
+        <input type="submit" value="Post">
+      </form>
+
+    </div>
+
+    <script src="{{url_for('static', filename='functions.js')}}"></script>
+  </body>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+</html>

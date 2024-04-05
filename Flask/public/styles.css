@@ -1,0 +1,15 @@
+.roboto-regular {
+    font-family: "Roboto", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+
+#logo {
+  width: 200px;
+}
+
+#post-message {
+  width: 300px;
+  height: 100px;
+  resize: none;
+}
