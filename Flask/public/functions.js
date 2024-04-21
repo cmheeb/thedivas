@@ -127,6 +127,10 @@ function openTab(evt, tabName) {
 
     // Load posts for the selected tab
     loadPosts(tabName)
+
+    if (tabName == 'DirectMessage'){
+        loadUsers();
+    }
 }
 
 // Runs when the DOM is fully loaded
@@ -243,5 +247,16 @@ async function likePost(postID){
     }
 }
 
+async function loadUsers(){
+    const response = await fetch('/users');
+    const users = await response.json();
+    const userList = document.getElementById('user-list');
+    userList.innerHTML = "";
+    users.forEach(user => {
+        const userElement = document.createElement('div');
+        userElement.innerHTML = user;
+        userList.appendChild(userElement);
+    });
+}
 
 window.onload = checkAuth;

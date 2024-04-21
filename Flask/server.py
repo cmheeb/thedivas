@@ -264,6 +264,12 @@ def likepost():
         return jsonify(message = "Liked post"), 200
 
 
+@app.route('/users', methods=['GET'])
+def users():
+    users = mongo.db.users
+    users_list = [user['username'] for user in users.find()]
+    return jsonify(users_list)
+
 if __name__ == '__main__':
     print("Listening on port 8080")
     app.run(debug=True)    
