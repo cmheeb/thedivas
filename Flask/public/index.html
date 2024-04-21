@@ -46,16 +46,18 @@
     <div id="Serious" class="tabcontent">
       <h3>Serious Posts</h3>
       <div id="serious-posts"></div>
-      <form onsubmit="submitPost('Serious'); return false;">
+      <form onsubmit="submitPost('Serious'); return false;" enctype="multipart/form-data">
         <textarea id="serious-post-content" placeholder="Type message..."></textarea>
+        <input type="file" id = "serious-post-content-image" accept="image/*">
         <button type="submit">Post</button>
       </form>
     </div>
     <div id="NonSerious" class="tabcontent">
       <h3>Non-Serious Posts</h3>
       <div id="non-serious-posts"></div>
-      <form onsubmit="submitPost('NonSerious'); return false;">
+      <form onsubmit="submitPost('NonSerious'); return false;" enctype="multipart/form-data">
         <textarea id="non-serious-post-content" placeholder="Type message..."></textarea>
+        <input type="file" id="non-serious-post-content-image" accept="image/*">
         <button type="submit">Post</button>
       
       </form>

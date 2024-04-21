@@ -143,31 +143,40 @@ async function submitPost(postType){
         contentID = 'non-serious-post-content';
     }
 
+    // Getting content from the form
     var content = document.getElementById(contentID).value;
+    var imageInput = document.getElementById(contentID + '-image');
 
-    // Checking if anything has been typed
-    if (!content.trim()){
-        alert("Cannot post empty text");
+    // Checking if anything has been typed and if an image has been selected
+    if (!content.trim() && !imageInput.files.length){
+        alert("Cannot post empty text without image");
         return;
     }
 
+    // Setting up form data
+    const formData = new FormData();
+    formData.append('text', content);
+    formData.append('type', postType);
+    // Check if image is present
+    if (imageInput.files[0]) {
+        formData.append('image', imageInput.files[0])
+    }
+
+
     const response = await fetch('/createpost', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            content: content,
-            type: postType
-        })
+        body: formData
     });
     
     const result = await response.json();
     if (response.ok){
         // Clearing textarea
         document.getElementById(contentID).value = '';
+        // Clearing image input
+        imageInput.value = '';
         // load posts
         loadPosts(postType);
+
     } else {
         // alert with error message from server or default message
         alert(result.message || "Failed to create post");
@@ -190,11 +199,26 @@ async function loadPosts(threadType){
     posts.forEach( post => {
         const postElement = document.createElement('div');
         postElement.className = 'post';
-        postElement.innerHTML = `<strong>${post.username}:</strong> ${post.content}
+        // Setting post's inner HTML
+        let postHTML = `<strong>${post.username}:</strong> ${post.content}`;
+
+        // Checking if image is present
+        if (post.imageURL) {
+            postHTML += `<img src="${post.imageURL}" alt= "Posted Image" style="max-width:100%; height = auto;">`;
+        }
+        // Adding the like button
+        postHTML += `<div class = "post-likes">
+                    <button onclick="likePost('${post.ID}')">Like</button>
+                    <span>${post.likeCount} likes</span>
+                    </div>`;
+
+        postElement.innerHTML = postHTML;
+        /*postElement.innerHTML = `<strong>${post.username}:</strong> ${post.content}
                                 <div class = "post-likes">
                                  <button onclick="likePost('${post.ID}')">Like</button>
                                 <span>${post.likeCount} likes</span>
                                 </div>`;
+        */
         postContainer.appendChild(postElement);
     });
 }

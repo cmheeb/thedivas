@@ -12,3 +12,5 @@ services:
       - '8080:8080'
     depends_on:
       - mongo
+    volumes:
+      - ./user_images:/app/public/images/user_images

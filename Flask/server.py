@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, make_response
+from flask import Flask, render_template, request, jsonify, redirect, url_for, make_response, send_from_directory
 from flask_pymongo import PyMongo
 from dotenv import load_dotenv
+from uuid import uuid4
 import os
 import bcrypt
 import hashlib
@@ -157,17 +158,37 @@ def createpost():
         return jsonify(message = "Not authenticated"), 401
     
     # Generating random post ID
-    postID = os.urandom(16).hex()
+    postID = uuid4().hex
 
-    data = request.json
+    # Getting data from the form
+    postType = request.form.get('type')
+    text = request.form.get('text')
+    image = request.files.get('image')
+    imageURL = None
+
+    # Checking if image is in request
+    if image:
+        fileType = os.path.splitext(image.filename)[1]
+        fileName = f'{uuid4().hex}{fileType}'
+        image.save(os.path.join('/app/public/images/user_images', fileName))
+        imageURL = f'/public/images/user_images/{fileName}'
+
+        
+
     postsCollection.insert_one({
         'username': user['username'],
-        'content': html.escape(data['content']),
-        'type': data['type'],
+        'content': html.escape(text),
+        'type': postType,
         'ID': postID,
+        'imageURL': imageURL,
         'likes': [] # Initializing array for likes
     })
     return jsonify(status='ok', message='Posts created successfully', postID=postID)
+
+# Serving Images
+@app.route('/images/user_images/<filename>')
+def uploaded_file(filename):
+    return send_from_directory('/app/public/images/user_images', filename)
 
 # Get Posts
 @app.route('/getposts', methods=['GET'])
@@ -187,6 +208,7 @@ def getposts():
         'content': post['content'],
         'type': post['type'],
         'ID': post['ID'],
+        'imageURL': post.get('imageURL'),
         'likeCount': len(post.get('likes', []))
     } for post in posts]
 
