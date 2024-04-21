@@ -39,15 +39,29 @@
     <br>
     <br>
 
-    <div id="chat-box">
-
-      <form id="chat-form">
-        <label for="msg">Message:</label>
-          <textarea id="post-message" placeholder="Type message.." required></textarea>
-        <input type="submit" value="Post">
-      </form>
-
+    <div id="tabs">
+      <button class="tablink" id="defaulttab" onclick="openTab(event, 'Serious')">Serious</button>
+      <button class="tablink" onclick="openTab(event, 'NonSerious')">Non-Serious</button>
     </div>
+    <div id="Serious" class="tabcontent">
+      <h3>Serious Posts</h3>
+      <div id="serious-posts"></div>
+      <form onsubmit="submitPost('Serious'); return false;">
+        <textarea id="serious-post-content" placeholder="Type message..."></textarea>
+        <button type="submit">Post</button>
+      </form>
+    </div>
+    <div id="NonSerious" class="tabcontent">
+      <h3>Non-Serious Posts</h3>
+      <div id="non-serious-posts"></div>
+      <form onsubmit="submitPost('NonSerious'); return false;">
+        <textarea id="non-serious-post-content" placeholder="Type message..."></textarea>
+        <button type="submit">Post</button>
+      
+      </form>
+    </div>
+
+    
 
     <script src="{{url_for('static', filename='functions.js')}}"></script>
   </body>

@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 import bcrypt
 import hashlib
+import html
 
 # Loading environtment variable
 load_dotenv()
@@ -83,7 +84,7 @@ def login():
         users.update_one({'username': username}, {'$set': {'tokenHash': tokenHash}})
 
         # Sending token to the user as 'auth_token' cookie
-        response = make_response(jsonify(message="Login Successful"), 200)
+        response = make_response(jsonify(message="Login Successful", username=username), 200)
         response.set_cookie('auth_token', token, httponly=True, max_age=3600)
         return response
     
@@ -133,6 +134,105 @@ def logout():
     response = make_response(jsonify(message="Logout Successful"), 200)
     response.set_cookie('auth_token', '', max_age=0)
     return response
+
+# Create Posts
+@app.route('/createpost', methods=['POST'])
+def createpost():
+    # users collection
+    users = mongo.db.users
+    # posts collection
+    postsCollection = mongo.db.posts
+
+    # Checking for auth token
+    if 'auth_token' not in request.cookies:
+        return jsonify(message = "Not authenticated"), 401
+    
+
+    token = request.cookies.get('auth_token')
+    tokenHash = hashlib.sha256(token.encode('utf-8')).hexdigest()
+    user = users.find_one({'tokenHash': tokenHash})
+
+    # Check if user was found
+    if not user:
+        return jsonify(message = "Not authenticated"), 401
+    
+    # Generating random post ID
+    postID = os.urandom(16).hex()
+
+    data = request.json
+    postsCollection.insert_one({
+        'username': user['username'],
+        'content': html.escape(data['content']),
+        'type': data['type'],
+        'ID': postID,
+        'likes': [] # Initializing array for likes
+    })
+    return jsonify(status='ok', message='Posts created successfully', postID=postID)
+
+# Get Posts
+@app.route('/getposts', methods=['GET'])
+def getposts():
+    # Posts collection
+    postsCollection = mongo.db.posts
+    
+    # Getting thread type from request
+    threadType = request.args.get('threadType')
+
+    # Getting posts from collection
+    posts = postsCollection.find({'type': threadType})
+
+    # Converting posts to JSON functional list
+    posts_list = [{
+        'username': post['username'],
+        'content': post['content'],
+        'type': post['type'],
+        'ID': post['ID'],
+        'likeCount': len(post.get('likes', []))
+    } for post in posts]
+
+    # Returing post list
+    return jsonify(posts_list)
+
+# Like Posts
+@app.route('/likepost', methods=['POST'])
+def likepost():
+    # Getting collections
+    users = mongo.db.users
+    posts = mongo.db.posts
+
+    # Getting post id from request
+    postID = request.json.get('postID')
+
+    if 'auth_token' not in request.cookies:
+        return jsonify(message="No auth token"), 401
+    
+    token = request.cookies.get('auth_token')
+    tokenHash = hashlib.sha256(token.encode('utf-8')).hexdigest()
+    user = users.find_one({'tokenHash': tokenHash})
+
+    if not user:
+        return jsonify(message = "User not found"), 401
+
+    username = user['username']
+
+
+    # Getting post with id
+    post = posts.find_one({'ID': postID})
+
+    # Checking if post doesn't exist
+    if not post:
+        return jsonify(message = "Post not found"), 404
+    
+    # Checking if user already like the post
+    if username in post.get('likes', []):
+        # Remove user from liked list
+        posts.update_one({'ID': postID}, {'$pull': {'likes': username}})
+        return jsonify(message = "Removed like from post"), 200
+    else:
+        # Adding user to liked list
+        posts.update_one({'ID': postID}, {'$push': {'likes': username}})
+        return jsonify(message = "Liked post"), 200
+
 
 if __name__ == '__main__':
     print("Listening on port 8080")
