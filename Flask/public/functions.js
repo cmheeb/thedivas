@@ -139,8 +139,10 @@ async function submitPost(postType){
     var contentID;
     if (postType == 'Serious'){
         contentID = 'serious-post-content';
-    } else {
+    } else if (postType == 'NonSerious') {
         contentID = 'non-serious-post-content';
+    } else {
+        contentID = 'direct-message-post-content';
     }
 
     // Getting content from the form
@@ -188,8 +190,10 @@ async function loadPosts(threadType){
     var postContainerID;
     if (threadType == 'Serious') {
         postContainerID = 'serious-posts';
-    } else {
+    } else if (threadType == 'NonSerious'){
         postContainerID = 'non-serious-posts';
+    } else {
+        postContainerID = 'direct-message-posts';
     }
     const postContainer = document.getElementById(postContainerID);
 

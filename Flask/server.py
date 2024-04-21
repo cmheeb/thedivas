@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, make_response, send_from_directory
 from flask_pymongo import PyMongo
+from flask_socketio import SocketIO
 from dotenv import load_dotenv
 from uuid import uuid4
 import os
@@ -17,11 +18,13 @@ app = Flask(__name__, template_folder="public", static_folder="public")
 app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://localhost:27017/user-creds")
 mongo = PyMongo(app)
 
+# Setting up SocketIO
+socketio = SocketIO(app)
+
 # Favion
 @app.route('/favicon.ico')
 def favicon():
     return url_for('static', filename='images/favicon.ico')
-
 
 # Homepage
 @app.route('/')
