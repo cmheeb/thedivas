@@ -168,10 +168,15 @@ def createpost():
 
     # Checking if image is in request
     if image:
+        # Checking if the file is actually an image
+        allowedExtensions = {'.png', '.jpg', '.jpeg', '.gif', '.webp'}
         fileType = os.path.splitext(image.filename)[1]
-        fileName = f'{uuid4().hex}{fileType}'
-        image.save(os.path.join('/app/public/images/user_images', fileName))
-        imageURL = f'/public/images/user_images/{fileName}'
+        if fileType in allowedExtensions:
+            fileName = f'{uuid4().hex}{fileType}'
+            image.save(os.path.join('/app/public/images/user_images', fileName))
+            imageURL = f'/public/images/user_images/{fileName}'
+        else:
+            return jsonify(message = "File type not allowed"), 400
 
         
 
