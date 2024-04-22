@@ -1,3 +1,11 @@
+const socket = io();
+
+socket.on('posted', function(post) {
+    if(currentThreadType == post.type) {
+        loadPosts(post)
+    }
+});
+
 const regForm = document.getElementById('reg-form');
 regForm.addEventListener('submit', regUser);
 
@@ -191,6 +199,7 @@ async function submitPost(postType){
 async function loadPosts(threadType){
     const response = await fetch(`/getposts?threadType=${threadType}`);
     const posts = await response.json();
+
     var postContainerID;
     if (threadType == 'Serious') {
         postContainerID = 'serious-posts';

@@ -1,25 +1,34 @@
+import json
 from flask import Flask, render_template, request, jsonify, redirect, url_for, make_response, send_from_directory
 from flask_pymongo import PyMongo
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 from dotenv import load_dotenv
 from uuid import uuid4
+from bson import ObjectId, json_util
 import os
 import bcrypt
 import hashlib
 import html
+import uuid
 
 # Loading environtment variable
 load_dotenv()
 
 # Setting up flask to use "public" as the static folder
 app = Flask(__name__, template_folder="public", static_folder="public")
+socketio = SocketIO(app, logger=True, engineio_logger=True)
+
+@socketio.on('connect')
+def handle_connect():
+    print("Client connected")
+
+@socketio.on('post')
+def handle_post(post):
+    emit('posted', post, broadcast=True)
 
 # Setting up MongoDB
 app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://localhost:27017/user-creds")
 mongo = PyMongo(app)
-
-# Setting up SocketIO
-socketio = SocketIO(app)
 
 # Favion
 @app.route('/favicon.ico')
@@ -30,7 +39,6 @@ def favicon():
 @app.route('/')
 def home():
     return render_template("index.html")
-
 
 # Registration
 @app.route('/register', methods=['POST'])
@@ -161,7 +169,7 @@ def createpost():
         return jsonify(message = "Not authenticated"), 401
     
     # Generating random post ID
-    postID = uuid4().hex
+    postID = str(uuid.uuid4())
 
     # Getting data from the form
     postType = request.form.get('type')
@@ -181,16 +189,17 @@ def createpost():
         else:
             return jsonify(message = "File type not allowed"), 400
 
-        
-
-    postsCollection.insert_one({
+    post = {
         'username': user['username'],
         'content': html.escape(text),
         'type': postType,
         'ID': postID,
         'imageURL': imageURL,
         'likes': [] # Initializing array for likes
-    })
+    }   
+
+    postsCollection.insert_one(post)
+    socketio.emit('posted', post)
     return jsonify(status='ok', message='Posts created successfully', postID=postID)
 
 # Serving Images
@@ -272,4 +281,5 @@ def users():
 
 if __name__ == '__main__':
     print("Listening on port 8080")
-    app.run(debug=True)    
+    # app.run(debug=True)
+    socketio.run(app, debug=True)
