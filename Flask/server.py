@@ -24,7 +24,7 @@ def handle_connect():
 
 @socketio.on('post')
 def handle_post(post):
-    emit('posted', post, broadcast=True)
+    emit('posted', post)
 
 # Setting up MongoDB
 app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://localhost:27017/user-creds")
@@ -33,7 +33,7 @@ mongo = PyMongo(app)
 # Favion
 @app.route('/favicon.ico')
 def favicon():
-    return url_for('static', filename='images/favicon.ico')
+    return url_for('static', filename='public/images/favicon.ico')
 
 # Homepage
 @app.route('/')
@@ -199,6 +199,9 @@ def createpost():
     }   
 
     postsCollection.insert_one(post)
+
+    post['_id'] = str(post['_id'])
+    
     socketio.emit('posted', post)
     return jsonify(status='ok', message='Posts created successfully', postID=postID)
 

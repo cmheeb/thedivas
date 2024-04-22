@@ -2,8 +2,8 @@ const socket = io();
 
 socket.on('posted', function(post) {
     if(currentThreadType == post.type) {
-        loadPosts(post)
-    }
+        loadPosts(post.type)
+    };
 });
 
 const regForm = document.getElementById('reg-form');
