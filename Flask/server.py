@@ -33,7 +33,12 @@ mongo = PyMongo(app)
 # Favion
 @app.route('/favicon.ico')
 def favicon():
-    return url_for('static', filename='public/images/favicon.ico')
+    return url_for('static', filename='/public/images/favicon.ico')
+
+@app.after_request
+def apply_caching(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
 
 # Homepage
 @app.route('/')
@@ -201,7 +206,7 @@ def createpost():
     postsCollection.insert_one(post)
 
     post['_id'] = str(post['_id'])
-    
+
     socketio.emit('posted', post)
     return jsonify(status='ok', message='Posts created successfully', postID=postID)
 
