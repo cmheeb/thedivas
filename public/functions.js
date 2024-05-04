@@ -217,8 +217,10 @@ async function loadPosts(threadType){
     posts.forEach( post => {
         const postElement = document.createElement('div');
         postElement.className = 'post';
+        const postDate = new Date(post.timestamp);
+        const formattedDate = postDate.toLocaleString(); 
         // Setting post's inner HTML
-        let postHTML = `<strong>${post.username}:</strong> ${post.content}`;
+        let postHTML = `<strong>${post.username}:</strong> ${post.content}<br><small>${formattedDate}</small>`;
 
         // Checking if image is present
         if (post.imageURL) {

@@ -5,6 +5,7 @@ from flask_socketio import SocketIO, emit
 from dotenv import load_dotenv
 from uuid import uuid4
 from bson import ObjectId, json_util
+from datetime import datetime, timezone
 import os
 import bcrypt
 import hashlib
@@ -208,6 +209,8 @@ def createpost():
     text = request.form.get('text')
     image = request.files.get('image')
     imageURL = None
+    # Creating a timestamp that is formatted to ISO 8601 a.k.a. YYYY-MM-DD HH.MM.SS.MMMM
+    timestamp = datetime.now(timezone.utc).isoformat()
 
     # Checking if image is in request
     if image:
@@ -227,7 +230,8 @@ def createpost():
         'type': postType,
         'ID': postID,
         'imageURL': imageURL,
-        'likes': [] # Initializing array for likes
+        'likes': [], # Initializing array for likes
+        'timestamp': timestamp
     }   
 
     postsCollection.insert_one(post)
@@ -261,7 +265,8 @@ def getposts():
         'type': post['type'],
         'ID': post['ID'],
         'imageURL': post.get('imageURL'),
-        'likeCount': len(post.get('likes', []))
+        'likeCount': len(post.get('likes', [])),
+        'timestamp': post.get('timestamp')
     } for post in posts]
 
     # Returing post list
