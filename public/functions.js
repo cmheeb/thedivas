@@ -1,5 +1,5 @@
 const socket = io();
-
+var globaluser = '';
 socket.on('posted', function(post) {
     if(currentThreadType == post.type) {
         loadPosts(post.type)
@@ -64,6 +64,7 @@ async function login(event) {
         loggedin = true;
         await checkAuth();
         document.getElementById("user-credentials").innerHTML = `<div id="logout">Hello, ${result.username}! <form><input type="submit" value="Logout"></form></div>`;
+        globaluser = result.username;
         const logoutForm = document.getElementById('logout');
         logoutForm.addEventListener('submit', logout);    
     } else {

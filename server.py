@@ -53,7 +53,7 @@ def home():
     return render_template("index.html")
 
 @app.route('/account', methods=['POST'])
-def profile():
+def account():
 
     users = mongo.db.users
 
@@ -67,6 +67,10 @@ def profile():
     else:
         print("No auth token")
         return redirect('/')
+
+@app.route('/change-password', methods=['POST'])
+def change_password():
+    return
 
 # Registration
 @app.route('/register', methods=['POST'])

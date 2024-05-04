@@ -18,7 +18,31 @@
       </form>
     </div>
 
+    <div id="user-account">
+      <h3>Hello, {{user}}!</h3>
+    </div>
+
+    <div>
+      <h4>Update Username</h4>
+      <form id="update-username-form">
+        <input id="update-username" type="text" placeholder="New Username">
+        <br>
+        <input type="submit" value="Update Username">
+      </form>
+    </div>
+    <div>
+      <h4>Change Password</h4>
+      <form id="change-password-form">
+        <input id="change-password" type="password" placeholder="New Password">
+        <br>
+        <input id="confirm-change-password" type="password" placeholder="Confirm New Password">
+        <br>
+        <input type="submit" value="Change Password">
+      </form>
+    </div>
+
     <script src="{{url_for('static', filename='functions.js')}}"></script>
+    <script src="{{url_for('static', filename='account.js')}}"></script>
   </body>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
