@@ -35,6 +35,13 @@ mongo = PyMongo(app)
 def favicon():
     return url_for('static', filename='/public/images/favicon.ico')
 
+# COMMENT THIS OUT FOR LOCAL TESTING
+# @app.before_request
+# def before_request():
+#     url = request.url.replace('http://', 'https://', 1)
+#     code = 301
+#     return redirect(url, code=code)
+
 @app.after_request
 def apply_caching(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -44,6 +51,10 @@ def apply_caching(response):
 @app.route('/')
 def home():
     return render_template("index.html")
+
+@app.route('/account')
+def profile():
+    return render_template("account.html")
 
 # Registration
 @app.route('/register', methods=['POST'])
@@ -290,4 +301,6 @@ def users():
 if __name__ == '__main__':
     print("Listening on port 8080")
     # app.run(debug=True)
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=True, port=8080)
+    # , ssl_context=('/nginx/cert.pem', '/nginx/private.key')
+    # COMMENT FROM ', PORT=8080' TO THE END FOR LOCAL TESTING
