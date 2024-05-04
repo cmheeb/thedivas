@@ -5,6 +5,7 @@ from flask_socketio import SocketIO, emit
 from dotenv import load_dotenv
 from uuid import uuid4
 from bson import ObjectId, json_util
+from datetime import datetime, timezone
 import os
 import bcrypt
 import hashlib
@@ -52,7 +53,7 @@ def apply_caching(response):
 def home():
     return render_template("index.html")
 
-@app.route('/account', methods=['POST'])
+@app.route('/account', methods=['POST', 'GET'])
 def account():
 
     users = mongo.db.users
@@ -68,9 +69,82 @@ def account():
         print("No auth token")
         return redirect('/')
 
+# Changing password
 @app.route('/change-password', methods=['POST'])
 def change_password():
-    return
+    # Users collection
+    users = mongo.db.users
+
+    if 'auth_token' not in request.cookies:
+        return jsonify(message = "Not authenticated"), 401
+    
+    newPassword = request.form.get('password')
+    confirmPassword = request.form.get('confirmPassword')
+
+    if newPassword != confirmPassword:
+        return jsonify(message = "Passwords do not match"), 403
+    
+    token = request.cookies.get('auth_token')
+    hashedToken = hashlib.sha256(token.encode()).hexdigest()
+    user = users.find_one({'tokenHash': hashedToken})
+
+    if user:
+        # Encoding password to bytes
+        newPassword = newPassword.encode('utf-8')
+
+        # Salting and hashing the password
+        hashed_password = bcrypt.hashpw(newPassword, bcrypt.gensalt())
+
+        # Updating DB
+        users.update_one({'_id': user['_id']}, {'$set': {'password': hashed_password}})
+        
+        return jsonify(message = "Password changed successfully"), 200
+    else:
+        return jsonify(message = "User not found"), 404
+    
+
+# Getting username
+@app.route('/get-username', methods=['GET'])
+def get_username():
+    # Users collection
+    users = mongo.db.users
+
+    if 'auth_token' not in request.cookies:
+        return jsonify(username=None, message = "Not authenticated"), 401
+    else:
+        # Getting username from DB using auth token
+        token = request.cookies.get('auth_token')
+        hashedToken = hashlib.sha256(token.encode()).hexdigest()
+        user = users.find_one({'tokenHash': hashedToken})
+        if user:
+            return jsonify(username=user['username']), 200
+        else:
+            return jsonify(username=None, message = "Not authenticated"), 401
+
+
+# Changing username
+@app.route('/update-username', methods=['POST'])
+def update_username():
+    # Users collection
+    users = mongo.db.users
+
+    if 'auth_token' not in request.cookies:
+        return jsonify(message = "Not authenticated"), 401
+    
+    newName = request.form.get('username')
+    if not newName:
+        return jsonify(message = "New username is required"), 400
+    
+    token = request.cookies.get('auth_token')
+    hashedToken = hashlib.sha256(token.encode()).hexdigest()
+    user = users.find_one({'tokenHash': hashedToken})
+
+    if user:
+        users.update_one({'_id': user['_id']}, {'$set': {'username': newName}})
+        return jsonify(message = "Username updated successfully"), 200
+    
+    else:
+        return jsonify(message = "User not found"), 404
 
 # Registration
 @app.route('/register', methods=['POST'])
@@ -208,6 +282,8 @@ def createpost():
     text = request.form.get('text')
     image = request.files.get('image')
     imageURL = None
+    # Creating a timestamp that is formatted to ISO 8601 a.k.a. YYYY-MM-DD HH.MM.SS.MMMM
+    timestamp = datetime.now(timezone.utc).isoformat()
 
     # Checking if image is in request
     if image:
@@ -227,7 +303,8 @@ def createpost():
         'type': postType,
         'ID': postID,
         'imageURL': imageURL,
-        'likes': [] # Initializing array for likes
+        'likes': [], # Initializing array for likes
+        'timestamp': timestamp
     }   
 
     postsCollection.insert_one(post)
@@ -261,7 +338,8 @@ def getposts():
         'type': post['type'],
         'ID': post['ID'],
         'imageURL': post.get('imageURL'),
-        'likeCount': len(post.get('likes', []))
+        'likeCount': len(post.get('likes', [])),
+        'timestamp': post.get('timestamp')
     } for post in posts]
 
     # Returing post list
