@@ -48,7 +48,7 @@ def apply_caching(response):
     return response
 
 # Homepage
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['POST'])
 def home():
     return render_template("index.html")
 
