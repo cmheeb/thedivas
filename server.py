@@ -48,7 +48,7 @@ def apply_caching(response):
     return response
 
 # Homepage
-@app.route('/', methods=['POST'])
+@app.route('/', methods=['POST', 'GET'])
 def home():
     return render_template("index.html")
 
@@ -316,7 +316,7 @@ def users():
 
 if __name__ == '__main__':
     print("Listening on port 8080")
-    # app.run(debug=True)
-    socketio.run(app, debug=True, port=8080)
+    #app.run(debug=True)
+    socketio.run(app, debug=True)#, port=8080)
     # , ssl_context=('/nginx/cert.pem', '/nginx/private.key')
     # COMMENT FROM ', PORT=8080' TO THE END FOR LOCAL TESTING
