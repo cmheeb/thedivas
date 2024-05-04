@@ -10,8 +10,12 @@
   <body class="roboto-regular">
 
     <div class="menu">
-        <a action="/">Home</a>
-        <a class="active" action="/account">My Account</a>
+      <form id="menuForm" method="post" action="/">
+        <button type="submit">Home</button>
+      </form>
+      <form id="menuForm" method="post" action="/account">
+        <button type="submit">My Account</button>
+      </form>
     </div>
 
     <script src="{{url_for('static', filename='functions.js')}}"></script>

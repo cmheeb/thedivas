@@ -48,13 +48,25 @@ def apply_caching(response):
     return response
 
 # Homepage
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
     return render_template("index.html")
 
-@app.route('/account')
+@app.route('/account', methods=['POST'])
 def profile():
-    return render_template("account.html")
+
+    users = mongo.db.users
+
+    if 'auth_token' in request.cookies:
+        token = request.cookies.get('auth_token')
+        hashedToken = hashlib.sha256(token.encode()).hexdigest()
+        user = users.find_one({'tokenHash': hashedToken})
+
+        if user:
+            return render_template('account.html', username=user['username'])
+    else:
+        print("No auth token")
+        return redirect('/')
 
 # Registration
 @app.route('/register', methods=['POST'])
