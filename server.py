@@ -287,6 +287,7 @@ def createpost():
     timestamp = datetime.now(timezone.utc)
     # getting time delay for post
     delay = int(request.form.get('delay', 0))
+    # adding delay to timestamp
     posttime = timestamp + timedelta(seconds=delay)
 
     # Checking if image is in request
@@ -309,14 +310,16 @@ def createpost():
         'ID': postID,
         'imageURL': imageURL,
         'likes': [], # Initializing array for likes
-        'timestamp': timestamp.isoformat(),
+        'timestamp': timestamp.isoformat(), # .isoformat to convert to time
         'delay': delay,
-        'posttime': posttime.isoformat()
+        'posttime': posttime.isoformat() # ^^
     }   
 
+    # if delay add to delay collection
     if delay > 0:
         delayCollection.insert_one(post)
         post['_id'] = str(post['_id'])
+        # create/add post id to list in user collection
         users.update_one({'_id': user['_id']}, {'$addToSet': {'postIDs': postID}})
     else:
         postsCollection.insert_one(post)
