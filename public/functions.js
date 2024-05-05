@@ -161,6 +161,9 @@ async function submitPost(postType){
     // Getting content from the form
     var content = document.getElementById(contentID).value;
     var imageInput = document.getElementById(contentID + '-image');
+    // get time from post
+    var delay = parseInt(document.getElementById('delay').value) * 1000;
+    console.log(delay)
 
     // Checking if anything has been typed and if an image has been selected
     if (!content.trim() && !imageInput.files.length){
@@ -172,11 +175,11 @@ async function submitPost(postType){
     const formData = new FormData();
     formData.append('text', content);
     formData.append('type', postType);
+    formData.append('delay', delay);
     // Check if image is present
     if (imageInput.files[0]) {
         formData.append('image', imageInput.files[0])
     }
-
 
     const response = await fetch('/createpost', {
         method: 'POST',

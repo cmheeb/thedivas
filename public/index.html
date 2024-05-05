@@ -61,6 +61,8 @@
       <form onsubmit="submitPost('Serious'); return false;" enctype="multipart/form-data">
         <textarea id="serious-post-content" placeholder="Type message..."></textarea>
         <input type="file" id = "serious-post-content-image" accept="image/*">
+        <label for="delay">Time Delay in seconds: </label>
+        <input type="number" id="delay" min="0" step="1" value="0">
         <button type="submit">Post</button>
       </form>
     </div>
@@ -71,6 +73,8 @@
       <form onsubmit="submitPost('NonSerious'); return false;" enctype="multipart/form-data">
         <textarea id="non-serious-post-content" placeholder="Type message..."></textarea>
         <input type="file" id="non-serious-post-content-image" accept="image/*">
+        <label for="delay" style="font-size: 10px;">Time Delay in seconds: </label>
+        <input type="number" id="delay" min="0" step="1" value="0">
         <button type="submit">Post</button>
       </form>
     </div>
@@ -81,7 +85,9 @@
       <div id="direct-message-posts"></div>
       <form onsubmit="submitPost('DirectMessage'); return false;" enctype="multipart/form-data">
         <textarea id="direct-message-post-content" placeholder="Type message..."></textarea>
-        <input type="file" id="direct-message-post-content-image" accept="image/*">
+        <input type="file" id="direct-message-post-content-image" accept="image/*"><br>
+        <label for="delay">Time Delay in seconds: </label>
+        <input type="number" id="delay" min="0" step="1" value="0">
         <button type="submit">Post</button>
       </form>
     </div>

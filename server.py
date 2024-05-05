@@ -11,6 +11,8 @@ import bcrypt
 import hashlib
 import html
 import uuid
+import time
+import asyncio
 
 # Loading environtment variable
 load_dotenv()
@@ -255,7 +257,7 @@ def logout():
 
 # Create Posts
 @app.route('/createpost', methods=['POST'])
-def createpost():
+async def createpost():
     # users collection
     users = mongo.db.users
     # posts collection
@@ -284,6 +286,9 @@ def createpost():
     imageURL = None
     # Creating a timestamp that is formatted to ISO 8601 a.k.a. YYYY-MM-DD HH.MM.SS.MMMM
     timestamp = datetime.now(timezone.utc).isoformat()
+    # getting time delay for post
+    delay = int(request.form.get('delay', 0))
+    # await asyncio.sleep(delay)
 
     # Checking if image is in request
     if image:
@@ -296,6 +301,7 @@ def createpost():
             imageURL = f'/public/images/user_images/{fileName}'
         else:
             return jsonify(message = "File type not allowed"), 400
+        
 
     post = {
         'username': user['username'],
@@ -394,7 +400,7 @@ def users():
 
 if __name__ == '__main__':
     print("Listening on port 8080")
-    #app.run(debug=True)
-    socketio.run(app, debug=True)#, port=8080)
+    app.run(debug=True)
+    # socketio.run(app, debug=True)#, port=8080)
     # , ssl_context=('/nginx/cert.pem', '/nginx/private.key')
     # COMMENT FROM ', PORT=8080' TO THE END FOR LOCAL TESTING
