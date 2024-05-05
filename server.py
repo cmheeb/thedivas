@@ -257,11 +257,12 @@ def logout():
 
 # Create Posts
 @app.route('/createpost', methods=['POST'])
-async def createpost():
+def createpost():
     # users collection
     users = mongo.db.users
     # posts collection
     postsCollection = mongo.db.posts
+    delayCollection = mongo.db.delay
 
     # Checking for auth token
     if 'auth_token' not in request.cookies:
@@ -288,7 +289,6 @@ async def createpost():
     timestamp = datetime.now(timezone.utc).isoformat()
     # getting time delay for post
     delay = int(request.form.get('delay', 0))
-    # await asyncio.sleep(delay)
 
     # Checking if image is in request
     if image:
@@ -313,9 +313,13 @@ async def createpost():
         'timestamp': timestamp
     }   
 
-    postsCollection.insert_one(post)
+    if delay > 0:
+        delayCollection.insert_one(post)
+        post['_id'] = str(post['_id'])  
+    else:
+        postsCollection.insert_one(post)
+        post['_id'] = str(post['_id'])
 
-    post['_id'] = str(post['_id'])
 
     socketio.emit('posted', post)
     return jsonify(status='ok', message='Posts created successfully', postID=postID)
