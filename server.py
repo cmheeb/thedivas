@@ -315,7 +315,8 @@ def createpost():
 
     if delay > 0:
         delayCollection.insert_one(post)
-        post['_id'] = str(post['_id'])  
+        post['_id'] = str(post['_id'])
+        users.update_one({'_id': user['_id']}, {'$addToSet': {'postIDs': postID}})
     else:
         postsCollection.insert_one(post)
         post['_id'] = str(post['_id'])
