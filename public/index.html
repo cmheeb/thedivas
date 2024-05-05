@@ -52,7 +52,7 @@
     <div id="tabs">
       <button class="tablink" id="defaulttab" onclick="openTab(event, 'Serious')">Serious</button>
       <button class="tablink" onclick="openTab(event, 'NonSerious')">Non-Serious</button>
-      <button class="tablink" onclick="openTab(event, 'DirectMessage')">Direct Messages</button>
+      <button class="tablink" onclick="openTab(event, 'ScheduledPosts')">Your Scheduled Posts</button>
     </div>
 
     <div id="Serious" class="tabcontent">
@@ -79,17 +79,9 @@
       </form>
     </div>
 
-    <div id="DirectMessage" class="tabcontent">
-      <h3>Direct Messages</h3>
-      <div id="user-list"></div><br>
-      <div id="direct-message-posts"></div>
-      <form onsubmit="submitPost('DirectMessage'); return false;" enctype="multipart/form-data">
-        <textarea id="direct-message-post-content" placeholder="Type message..."></textarea>
-        <input type="file" id="direct-message-post-content-image" accept="image/*"><br>
-        <label for="delay">Time Delay in seconds: </label>
-        <input type="number" id="delay" min="0" step="1" value="0">
-        <button type="submit">Post</button>
-      </form>
+    <div id="ScheduledPosts" class="tabcontent">
+      <h3>Scheduled Posts</h3>
+      <div id="scheduled-posts"></div>
     </div>
 
 

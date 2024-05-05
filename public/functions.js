@@ -9,6 +9,8 @@ socket.on('posted', function(post) {
 const regForm = document.getElementById('reg-form');
 regForm.addEventListener('submit', regUser);
 
+var pollingInterval = null;
+
 async function regUser(event) {
     event.preventDefault();
     const userfield = document.getElementById('reg-username');
@@ -112,6 +114,11 @@ async function login(event) {
     }
 
 function openTab(evt, tabName) {
+    // Resetting polling interval
+    if (pollingInterval){
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
 
     // Hiding all elements in the tabcontent class
     var tabContent = document.getElementsByClassName("tabcontent");
@@ -134,11 +141,19 @@ function openTab(evt, tabName) {
     // Setting current threadType to the selected tab
     currentThreadType = tabName;
 
+
+    // Load posts for the selected tab
+    // loadPosts(tabName)
+
+    // Checking which tab
+    if (tabName == 'ScheduledPosts'){
+        loadScheduledPosts();
+        
+        // Start polling every second
+        pollingInterval = setInterval(loadScheduledPosts, 1000);
+    } else {    
     // Load posts for the selected tab
     loadPosts(tabName)
-
-    if (tabName == 'DirectMessage'){
-        loadUsers();
     }
 }
 
@@ -162,7 +177,7 @@ async function submitPost(postType){
     var content = document.getElementById(contentID).value;
     var imageInput = document.getElementById(contentID + '-image');
     // get time from post
-    var delay = parseInt(document.getElementById('delay').value) * 1000;
+    var delay = parseInt(document.getElementById('delay').value);
     console.log(delay)
 
     // Checking if anything has been typed and if an image has been selected
@@ -243,6 +258,34 @@ async function loadPosts(threadType){
                                 </div>`;
         */
         postContainer.appendChild(postElement);
+    });
+}
+
+async function loadScheduledPosts(){
+    const response = await fetch(`/getscheduledposts`);
+    const posts = await response.json();
+
+    const postContainer = document.getElementById('scheduled-posts');
+
+    // Clearing existisng posts
+    postContainer.innerHTML = "";
+
+    posts.forEach( post => {
+        const postElement = document.createElement('div');
+        postElement.className = 'post';
+
+        let postHTML = `<strong>${post.username}:</strong> ${post.content}<br>
+        <small>Time until posted: ${post.delay} seconds</small>`
+
+        // Checking if image is present
+        if (post.imageURL) {
+            postHTML += `<img src="${post.imageURL}" alt= "Posted Image" style="max-width:100%; height = auto;">`;
+        }
+
+        postElement.innerHTML = postHTML;
+
+        postContainer.appendChild(postElement);
+
     });
 }
 

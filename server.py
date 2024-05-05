@@ -2,6 +2,7 @@ import json
 from flask import Flask, render_template, request, jsonify, redirect, url_for, make_response, send_from_directory
 from flask_pymongo import PyMongo
 from flask_socketio import SocketIO, emit
+from flask_apscheduler import APScheduler
 from dotenv import load_dotenv
 from uuid import uuid4
 from bson import ObjectId, json_util
@@ -18,6 +19,10 @@ load_dotenv()
 # Setting up flask to use "public" as the static folder
 app = Flask(__name__, template_folder="public", static_folder="public")
 socketio = SocketIO(app, logger=True, engineio_logger=True)
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
+
 
 @socketio.on('connect')
 def handle_connect():
@@ -406,6 +411,72 @@ def users():
     users = mongo.db.users
     users_list = [user['username'] for user in users.find()]
     return jsonify(users_list)
+
+@app.route('/getscheduledposts', methods=['GET'])
+def getscheduledposts():
+    # Delay collection and Users collection
+    delay = mongo.db.delay
+    users = mongo.db.users
+
+    if 'auth_token' not in request.cookies:
+        return jsonify(message="No auth token"), 401
+    
+    token = request.cookies.get('auth_token')
+    tokenHash = hashlib.sha256(token.encode('utf-8')).hexdigest()
+    user = users.find_one({'tokenHash': tokenHash})
+
+    if not user:
+        return jsonify(message = "User not found"), 401
+
+    # Getting current time
+    now = datetime.now(timezone.utc)
+
+    # Getting posts from delay collection
+    delayedPosts = delay.find({'username': user['username']})
+
+    # Converting posts to JSON functional list and updating delay
+    posts_list = []
+    for post in delayedPosts:
+        posttime = datetime.fromisoformat(post['posttime'])
+        delaySeconds = int((posttime - now).total_seconds())
+        posts_list.append({
+            'username': post['username'],
+            'content': post['content'],
+            'type': post['type'],
+            'ID': post['ID'],
+            'imageURL': post.get('imageURL'),
+            'delay': delaySeconds
+        })
+
+    # Returning post list
+    return jsonify(posts_list)
+
+
+# Moving scheduled posts
+def move_scheduled_posts():
+    # Post and Delay collections
+    posts = mongo.db.posts
+    delayed = mongo.db.delay
+
+    # Getting current time
+    now = datetime.now(timezone.utc)
+
+    # Getting posts that need to be moved by using mongo's less than equal to
+    delayedPosts = delayed.find({"posttime": {"$lte": now.isoformat()}})
+
+    for post in delayedPosts:
+        # Updating timestamp to current time
+        post['timestamp'] = now.isoformat()
+        # Adding post to posts collection and removing it from delayed collection
+        posts.insert_one(post)
+        delayed.delete_one({"_id": post['_id']})
+
+        # Sending the post over the socket
+        post['_id'] = str(post['_id'])
+        socketio.emit('posted', post)
+
+# Setting interval for checking if a post needs to be moved every second
+scheduler.add_job(id='Scheduled Post Job', func=move_scheduled_posts, trigger='interval', seconds=1)
 
 if __name__ == '__main__':
     print("Listening on port 8080")
