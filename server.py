@@ -5,14 +5,12 @@ from flask_socketio import SocketIO, emit
 from dotenv import load_dotenv
 from uuid import uuid4
 from bson import ObjectId, json_util
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import os
 import bcrypt
 import hashlib
 import html
 import uuid
-import time
-import asyncio
 
 # Loading environtment variable
 load_dotenv()
@@ -286,9 +284,10 @@ def createpost():
     image = request.files.get('image')
     imageURL = None
     # Creating a timestamp that is formatted to ISO 8601 a.k.a. YYYY-MM-DD HH.MM.SS.MMMM
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = datetime.now(timezone.utc)
     # getting time delay for post
     delay = int(request.form.get('delay', 0))
+    posttime = timestamp + timedelta(seconds=delay)
 
     # Checking if image is in request
     if image:
@@ -310,7 +309,9 @@ def createpost():
         'ID': postID,
         'imageURL': imageURL,
         'likes': [], # Initializing array for likes
-        'timestamp': timestamp
+        'timestamp': timestamp.isoformat(),
+        'delay': delay,
+        'posttime': posttime.isoformat()
     }   
 
     if delay > 0:
